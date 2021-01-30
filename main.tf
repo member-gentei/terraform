@@ -33,6 +33,14 @@ resource "google_project_iam_member" "logging_logWriter" {
   member = "serviceAccount:${each.key}"
 }
 
+resource "google_project_iam_member" "monitoring_metricWriter" {
+  for_each = toset([for sa in [
+    google_service_account.bot,
+  ] : sa.email])
+  role   = "roles/monitoring.metricWriter"
+  member = "serviceAccount:${each.key}"
+}
+
 resource "google_project_iam_member" "datastore_user" {
   for_each = toset([for sa in [
     google_service_account.api,
