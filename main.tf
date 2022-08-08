@@ -32,6 +32,16 @@ resource "kubernetes_role" "github-runner" {
     resources  = ["deployments"]
     verbs      = ["get", "read", "update", "patch", "list"]
   }
+  rule {
+    api_groups = ["batch"]
+    resources  = ["cronjobs"]
+    verbs      = ["get", "read", "update", "patch", "list"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["configmaps"]
+    verbs      = ["get", "read", "update", "patch", "list"]
+  }
   # read-only
   rule {
     api_groups = ["networking.k8s.io"]

@@ -33,3 +33,56 @@ resource "google_project_iam_member" "monitoring_metricWriter" {
   role    = "roles/monitoring.metricWriter"
   member  = "serviceAccount:${each.key}"
 }
+
+# pubsub topics, subscriptions, and IAM policies
+resource "google_pubsub_topic" "async" {
+  name = "async"
+}
+
+resource "google_pubsub_topic_iam_binding" "async" {
+  project = "member-gentei"
+  topic   = google_pubsub_topic.async.name
+  role    = "roles/pubsub.publisher"
+  members = [
+    "serviceAccount:${google_service_account.gentei.email}"
+  ]
+}
+
+resource "google_pubsub_subscription" "general" {
+  name                 = "general"
+  topic                = google_pubsub_topic.async.name
+  filter               = "attributes.type = \"general\""
+  ack_deadline_seconds = 600
+}
+
+resource "google_pubsub_subscription_iam_binding" "general" {
+  project      = "member-gentei"
+  subscription = google_pubsub_subscription.general.name
+  role         = "roles/pubsub.subscriber"
+  members = [
+    "serviceAccount:${google_service_account.gentei.email}"
+  ]
+}
+
+resource "google_pubsub_subscription" "bot-apply-membership" {
+  name                 = "bot-apply-membership"
+  topic                = google_pubsub_topic.async.name
+  filter               = "attributes.type = \"apply-membership\""
+  ack_deadline_seconds = 600
+}
+
+resource "google_pubsub_subscription_iam_binding" "bot-apply-membership" {
+  project      = "member-gentei"
+  subscription = google_pubsub_subscription.bot-apply-membership.name
+  role         = "roles/pubsub.subscriber"
+  members = [
+    "serviceAccount:${google_service_account.bot.email}"
+  ]
+}
+
+resource "google_logging_project_bucket_config" "default" {
+  project        = "projects/member-gentei"
+  location       = "global"
+  retention_days = 30
+  bucket_id      = "_Default"
+}
