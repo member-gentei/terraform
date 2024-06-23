@@ -15,12 +15,6 @@ provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
-resource "kubernetes_service_account" "gh-gentei" {
-  metadata {
-    name      = "gentei"
-    namespace = "github-actions"
-  }
-}
 
 resource "kubernetes_role" "github-runner" {
   metadata {
@@ -30,17 +24,17 @@ resource "kubernetes_role" "github-runner" {
   rule {
     api_groups = ["apps"]
     resources  = ["deployments"]
-    verbs      = ["get", "read", "update", "patch", "list"]
+    verbs      = ["create", "get", "read", "update", "patch", "list"]
   }
   rule {
     api_groups = ["batch"]
     resources  = ["cronjobs"]
-    verbs      = ["get", "read", "update", "patch", "list"]
+    verbs      = ["create", "get", "read", "update", "patch", "list"]
   }
   rule {
     api_groups = [""]
     resources  = ["configmaps"]
-    verbs      = ["get", "read", "update", "patch", "list"]
+    verbs      = ["create", "get", "read", "update", "patch", "list"]
   }
   # read-only
   rule {
@@ -62,7 +56,7 @@ resource "kubernetes_role_binding" "github-runner" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = "gentei"
-    namespace = "github-actions"
+    name      = "default"
+    namespace = "actions-runner-system"
   }
 }

@@ -2,6 +2,9 @@ provider "google" {
   project = "member-gentei"
 }
 
+data "google_project" "current" {
+}
+
 resource "google_service_account" "gentei" {
   account_id   = "gentei"
   display_name = "gentei"
