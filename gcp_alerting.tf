@@ -28,6 +28,12 @@ resource "google_service_account" "alerting-discord" {
   account_id = "alerting-discord"
 }
 
+resource "google_project_iam_member" "alerting-discord_logReader" {
+  project = "member-gentei"
+  role    = "roles/logging.viewer"
+  member  = google_service_account.alerting-discord.member
+}
+
 resource "google_cloud_run_service_iam_binding" "alerting-discord" {
   role     = "roles/run.invoker"
   location = "us-central1"
@@ -59,6 +65,9 @@ resource "google_cloudfunctions2_function" "discord-alert" {
     available_cpu                  = "83m"
     available_memory               = "128Mi"
     service_account_email          = google_service_account.alerting-discord.email
+    environment_variables = {
+      LOG_EXECUTION_ID = "true"
+    }
     secret_environment_variables {
       key        = "DISCORD_WEBHOOK_URL"
       project_id = data.google_project.current.number
